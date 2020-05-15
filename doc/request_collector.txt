@@ -1,0 +1,95 @@
+HTTP requests has the most problematic place - request URI.
+Example request:
+"GET URI HTTP/1.1"
+
+RFC recommends to use 2396 and 3986, but URIs from real world are different.
+There is old RFC for URI 1738, it describes several symbolds as unsafe.
+Many old HTTP clients and servers uses these symbols.
+
+We want to read/write all possible HTTP requests, so we have to know what symbols can be used.
+We are not going to parse request URI, so it is up to user what standard he wants to support.
+
+There are a lot of accidentally published webserver access logs available on the internet.
+You can check it by using any search engine with query like '"access.log"|"access_log" index|directory|listing|http|ftp'.
+
+It is possible to download these logs and collect information about request URIs.
+Standard format is the folowing:
+"GET URI HTTP/1.0" 200
+
+The amount of available compressed access logs is more than 1 terabyte.
+We can collect representative statistics.
+
+-----
+
+Search results are the list of page urls.
+We will visit pages in random order and collect all log urls that includes "log" substring.
+
+Page urls with at least one log url will be stored in "data/valid_page_urls.xz".
+Page urls with no log urls will be stored in "data/invalid_page_urls.xz".
+Links will be stored in "data/log_urls.xz".
+
+It is possible to view these lists by using "less data/valid_page_urls.xz".
+
+-----
+
+Log urls will be visited in random order.
+Log url is valid when it has at least one request.
+
+Valid log urls will be stored in "data/valid_log_urls.xz".
+Invalid log urls will be stored in "data/invalid_log_urls.xz".
+
+It is possible to view these lists by using "less data/valid_log_urls.xz".
+
+-----
+
+We don't need to store all URIs.
+We need just to store URIs that have at least one special symbol.
+HTTP request URIs with special symbols will be stored in "data/requests_with_special_symbols.xz".
+
+It is possible to view these lists by using "less data/requests_with_special_symbols.xz".
+
+There is a special script "scripts/requests_with_special_symbols.sh".
+It outputs a list of special symbols used in URIs.
+
+-----
+
+How to use these scripts?
+
+1. Install rvm
+curl -sSL https://get.rvm.io | bash -s stable
+
+2. Install ruby
+rvm install ruby-2.7.1 -C --enable-socks
+
+3. Install required gems
+bundle install
+
+4. Start tor
+Please use some convenient timeout like "SocksTimeout 10".
+sudo rc-service tor start
+
+5. Start privoxy, use config:
+listen-address 127.0.0.1:8118
+toggle 0
+forward-socks5t / 127.0.0.1:9050 .
+
+6. Updated urls
+./scripts/update_urls.sh
+
+7. Process requests
+./scripts/process_requests.sh
+
+8. List special symbols from URIs
+./scripts/requests_with_special_symbols.sh
+
+-----
+
+You can run these script in infinite loop to collect and process more data.
+
+./scripts/loop_update_urls.sh
+./scripts/loop_update_urls_and_process_requests.sh
+
+You updated something, how to re-process everything?
+./scripts/clear_urls.sh
+./scripts/clear_results.sh
+./scripts/loop_update_urls_and_process_requests.sh
