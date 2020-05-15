@@ -1,4 +1,4 @@
-# HTTPOG request collector scripts
+# Old generation HTTP request collector scripts
 
 Please read [documentation](doc/request_collector.txt).
 
