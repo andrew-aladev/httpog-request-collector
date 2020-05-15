@@ -1,6 +1,6 @@
 # Old generation HTTP request collector scripts
 
-Please read [documentation](doc/request_collector.txt).
+Please read [documentation](doc/request-collector.txt).
 
 ## License
 
