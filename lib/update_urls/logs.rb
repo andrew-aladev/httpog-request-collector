@@ -75,6 +75,9 @@ def get_log_urls_from_page_url(url)
       raise StandardError, "unknown uri scheme: #{scheme}"
     end
 
+  rescue QueryError => query_error
+    warn query_error
+    return []
   rescue StandardError => error
     warn error
     return nil
@@ -85,20 +88,18 @@ def get_log_urls_from_page_url(url)
     .flatten
     .compact
     .map do |log_url|
-      begin
-        uri    = URI Addressable::URI.parse(url).join(log_url).to_s
-        scheme = uri.scheme
+      uri    = URI Addressable::URI.parse(url).join(log_url).to_s
+      scheme = uri.scheme
 
-        case scheme
-        when "ftp", "http", "https"
-          uri.to_s
-        else
-          raise StandardError, "unknown uri scheme: #{scheme}"
-        end
-      rescue StandardError => error
-        warn error
-        next nil
+      case scheme
+      when "ftp", "http", "https"
+        uri.to_s
+      else
+        raise StandardError, "unknown uri scheme: #{scheme}"
       end
+    rescue StandardError => error
+      warn error
+      next nil
     end
     .compact
 

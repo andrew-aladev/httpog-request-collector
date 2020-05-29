@@ -51,6 +51,11 @@ def download_log(url)
       raise StandardError, "unknown uri scheme: #{scheme}"
     end
 
+  rescue QueryError => query_error
+    # Query error equal empty log from analysis perspective.
+    # So we can simulate that we received empty log.
+    warn query_error
+    File.write LOG_PATH, ""
   rescue StandardError => error
     warn error
     return nil

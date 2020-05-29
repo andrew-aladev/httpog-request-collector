@@ -20,6 +20,8 @@ QUERY_SIZE_LIMIT     = 1 << 30 # 1 GB
 
 QUERY_FTP_LISTING_TERMINATOR = "\n".freeze
 
+class QueryError < StandardError; end
+
 # -- http --
 
 QUERY_HTTP_OPTIONS =
@@ -36,7 +38,7 @@ QUERY_HTTP_OPTIONS =
   .freeze
 
 def get_http_content(uri, redirect_limit = QUERY_REDIRECT_LIMIT)
-  raise StandardError, "http redirect limit exceeded" if redirect_limit == 0
+  raise QueryError, "http redirect limit exceeded" if redirect_limit == 0
 
   options = QUERY_HTTP_OPTIONS.merge(
     :use_ssl => uri.scheme == "https"
@@ -49,10 +51,14 @@ def get_http_content(uri, redirect_limit = QUERY_REDIRECT_LIMIT)
       head          = http.request_head path_for_head
 
       content_length = head["content-length"].to_i
-      raise StandardError, "size limit exceeded, requested size: #{content_length}" if content_length > QUERY_SIZE_LIMIT
+      raise QueryError, "size limit exceeded, requested size: #{content_length}" if content_length > QUERY_SIZE_LIMIT
 
       http.get uri
     end
+  rescue QueryError => query_error
+    raise query_error
+  rescue Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError => http_error
+    raise QueryError, "http query failed, error: #{http_error}"
   rescue StandardError => error
     raise StandardError, "http query failed, error: #{error}"
   end
@@ -67,7 +73,7 @@ def get_http_content(uri, redirect_limit = QUERY_REDIRECT_LIMIT)
 
     get_http_content next_uri, redirect_limit - 1
   else
-    raise StandardError, "http response failed, code: #{response.code}"
+    raise QueryError, "http response failed, code: #{response.code}"
   end
 end
 
@@ -100,6 +106,10 @@ def process_ftp(uri, &_block)
       ftp.login
       yield ftp
     end
+  rescue QueryError => query_error
+    raise query_error
+  rescue Net::FTPError => ftp_error
+    raise QueryError, "ftp query failed, error: #{ftp_error}"
   rescue StandardError => error
     raise StandardError, "ftp query failed, error: #{error}"
   end
@@ -134,7 +144,7 @@ end
 
 def get_file_from_ftp(ftp, path, file_path)
   size = ftp.size path
-  raise StandardError, "size limit exceeded, requested size: #{size}" if size > QUERY_SIZE_LIMIT
+  raise QueryError, "size limit exceeded, requested size: #{size}" if size > QUERY_SIZE_LIMIT
 
   ftp.getbinaryfile path, file_path
 end
