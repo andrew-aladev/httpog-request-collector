@@ -63,5 +63,5 @@ def write_requests(file_path, requests)
     request[:request_uri] + REQUEST_SEPARATOR + request[:log_url]
   end
 
-  write_list file_path, data
+  write_list file_path, data.sort.uniq
 end
