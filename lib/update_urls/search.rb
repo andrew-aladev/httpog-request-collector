@@ -10,8 +10,34 @@ require_relative "../common/query"
 # This method provides better results.
 
 # "access.log"|"access_log" index|directory|listing|http|ftp
-MAIN_TEXTS       = %w[access.log access_log].freeze
-ADDITIONAL_TEXTS = %w[index directory listing http ftp].freeze
+MAIN_TEXTS = %w[
+  access.log
+  access_log
+]
+.freeze
+
+ADDITIONAL_TEXTS = %w[
+  archive
+  catalog
+  catalogue
+  data
+  directory
+  file
+  folder
+  ftp
+  http
+  index
+  library
+  list
+  listing
+  record
+  register
+  registry
+  repository
+  root
+  storage
+]
+.freeze
 
 def get_text
   [
