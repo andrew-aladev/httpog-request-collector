@@ -1,7 +1,6 @@
-require "colorize"
-require "filesize"
 require "uri"
 
+require_relative "../common/colorize"
 require_relative "../common/format"
 require_relative "../common/query"
 require_relative "../common/requests"
@@ -103,7 +102,8 @@ def process_archive(log_url, file_path, requests)
   end
 
   if is_valid
-    warn "log is #{'valid'.light_green}, received #{colorize_length(requests_length)} requests"
+    requests_text = colorize_length requests_length
+    warn "log is #{'valid'.light_green}, received #{requests_text} requests"
   else
     warn "log is invalid"
   end
@@ -128,8 +128,10 @@ def process_requests(log_urls, valid_log_urls, invalid_log_urls, requests)
       next if file_path.nil?
 
       begin
-        size = File.size file_path
-        warn "downloaded log, size: #{Filesize.new(size).pretty}"
+        size      = File.size file_path
+        size_text = format_filesize size
+
+        warn "downloaded log, size: #{size_text}"
 
         is_valid, new_requests_length = process_archive log_url, file_path, requests
 
@@ -149,8 +151,7 @@ def process_requests(log_urls, valid_log_urls, invalid_log_urls, requests)
       end
     end
 
-  logs_size_text = Filesize.new(logs_size).pretty
-
+  logs_size_text        = format_filesize logs_size
   invalid_log_urls_text = colorize_length invalid_log_urls_length
   valid_log_urls_text   = colorize_length valid_log_urls_length
   requests_text         = colorize_length requests_length

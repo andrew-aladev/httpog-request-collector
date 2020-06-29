@@ -1,7 +1,7 @@
 require "json"
 require "uri"
 
-require_relative "../common/format"
+require_relative "../common/colorize"
 require_relative "../common/query"
 
 STATS_URL = "https://searx.space/data/instances.json".freeze
