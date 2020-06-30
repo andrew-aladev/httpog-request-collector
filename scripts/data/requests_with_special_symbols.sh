@@ -6,4 +6,4 @@ cd "$DIR"
 
 cd "../.."
 
-./lib/requests_with_special_symbols/main.rb "data/requests_with_special_symbols.xz"
+./lib/requests_with_special_symbols.rb "data/requests_with_special_symbols.xz"

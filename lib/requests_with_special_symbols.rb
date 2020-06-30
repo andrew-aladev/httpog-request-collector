@@ -2,7 +2,7 @@
 
 require "pp"
 
-require_relative "../common/requests"
+require_relative "common/requests"
 
 requests = read_requests ARGV[0]
 

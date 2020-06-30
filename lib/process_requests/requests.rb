@@ -4,7 +4,7 @@ require_relative "../common/colorize"
 require_relative "../common/format"
 require_relative "../common/query"
 require_relative "../common/requests"
-require_relative "./archive"
+require_relative "archive"
 
 TEMP_DIRECTORY = File.join(File.dirname(__FILE__), "..", "..", "tmp").freeze
 LOG_PATH       = File.join(TEMP_DIRECTORY, "log").freeze
