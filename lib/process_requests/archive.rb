@@ -23,7 +23,7 @@ class ArchiveReader < Archive::BaseArchive
     end
   end
 
-  protected def next_header
+  def next_header
     header_ptr = FFI::MemoryPointer.new :pointer
 
     case C.archive_read_next_header archive, header_ptr
@@ -37,7 +37,7 @@ class ArchiveReader < Archive::BaseArchive
     end
   end
 
-  protected def read_data(&_block)
+  def read_data(&_block)
     buffer = FFI::MemoryPointer.new BUFFER_SIZE
 
     loop do
@@ -53,37 +53,33 @@ class ArchiveReader < Archive::BaseArchive
   end
 
   def read_lines(&_block)
-    until next_header.nil?
-      data = String.new :encoding => ::Encoding::BINARY
+    data = String.new :encoding => ::Encoding::BINARY
 
-      read_data do |bytes|
-        data << bytes
+    read_data do |bytes|
+      data << bytes
 
-        loop do
-          index = data.index LINE_TERMINATOR
-          break if index.nil?
+      loop do
+        index = data.index LINE_TERMINATOR
+        break if index.nil?
 
-          line = data.byteslice 0, index
-          yield line unless line.length.zero?
+        line = data.byteslice 0, index
+        yield line
 
-          next_index = index + LINE_TERMINATOR.length
-          data       = data.byteslice next_index, data.length - next_index
-        end
+        next_index = index + LINE_TERMINATOR.bytesize
+        data       = data.byteslice next_index, data.bytesize - next_index
       end
-
-      yield data unless data.length.zero?
     end
 
-    nil
+    yield data
   end
 
-  def self.read_lines(file_path, &block)
-    instance = new file_path
+  def self.open(file_path, &_block)
+    archive = new file_path
 
     begin
-      instance.read_lines(&block)
+      yield archive
     ensure
-      instance.close
+      archive.close
     end
   end
 end

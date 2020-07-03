@@ -28,8 +28,7 @@ REQUEST_REGEXP = Regexp.new(
     ['\"]
     [ ]
 
-    [123]
-    [0-9]{2}
+    [0-9]+
     [ ]
   ",
   Regexp::MULTILINE | Regexp::EXTENDED
@@ -63,38 +62,73 @@ def download_log(url)
   LOG_PATH
 end
 
-def process_archive(log_url, file_path, requests)
-  is_valid        = false
-  requests_length = 0
+def process_archive_file(log_url, archive)
+  # Validation result is unknown.
+  is_valid     = nil
+  new_requests = []
+
+  archive.read_lines do |line|
+    # We can ignore any line comes after validation result is false.
+    next if is_valid == false
+
+    # We can just ignore any empty lines.
+    next if line.strip.empty?
+
+    matches = line.scan(REQUEST_REGEXP).compact
+    if matches.empty?
+      warn "line: #{truncate_string(line)} is invalid"
+      is_valid = false
+      next
+    end
+
+    # Line is valid when all matches are valid.
+    is_valid = matches.all? do |match|
+      if match.length != 1
+        warn "match is invalid"
+        next false
+      end
+
+      request_uri = match[0]
+
+      unless request_uri.ascii_only?
+        warn "request uri: #{request_uri} is not ascii only"
+        next false
+      end
+
+      is_new_request_uri = request_uri.chars.any? { |char| !REQUEST_URI_REGULAR_CHARS.include?(char) }
+
+      if is_new_request_uri
+        new_requests << {
+          :request_uri => request_uri,
+          :log_url     => log_url
+        }
+      end
+
+      true
+    end
+  end
+
+  if is_valid
+    [true, new_requests]
+  else
+    [false, []]
+  end
+end
+
+def process_archive(log_url, file_path)
+  is_valid     = false
+  new_requests = []
 
   begin
-    ArchiveReader.read_lines(file_path) do |line|
-      line
-        .scan(REQUEST_REGEXP)
-        .compact
-        .each do |match|
-          next if match.length != 1
+    ArchiveReader.open file_path do |archive|
+      # Each archive can consist of multiple files.
+      until archive.next_header.nil?
+        is_file_valid, new_file_requests = process_archive_file log_url, archive
 
-          request_uri = match[0]
-
-          unless request_uri.ascii_only?
-            warn "request uri: #{request_uri} is not ascii only"
-            next
-          end
-
-          is_new_request_uri = request_uri.chars.any? { |char| !REQUEST_URI_REGULAR_CHARS.include?(char) }
-
-          if is_new_request_uri
-            requests << {
-              :request_uri => request_uri,
-              :log_url     => log_url
-            }
-            requests_length += 1
-          end
-
-          # We need at least one request.
-          is_valid = true
-        end
+        # Archive is valid when at least one file is valid.
+        is_valid = true if is_file_valid
+        new_requests.concat new_file_requests
+      end
     end
 
   rescue Archive::Error => error
@@ -102,13 +136,13 @@ def process_archive(log_url, file_path, requests)
   end
 
   if is_valid
-    requests_text = colorize_length requests_length
+    requests_text = colorize_length new_requests.length
     warn "log is #{'valid'.light_green}, received #{requests_text} requests"
   else
     warn "log is invalid"
   end
 
-  [is_valid, requests_length]
+  [is_valid, new_requests]
 end
 
 def process_requests(log_urls, valid_log_urls, invalid_log_urls, requests)
@@ -133,7 +167,7 @@ def process_requests(log_urls, valid_log_urls, invalid_log_urls, requests)
 
         warn "downloaded log, size: #{size_text}"
 
-        is_valid, new_requests_length = process_archive log_url, file_path, requests
+        is_valid, new_requests = process_archive log_url, file_path
 
         if is_valid
           valid_log_urls_length += 1
@@ -143,7 +177,8 @@ def process_requests(log_urls, valid_log_urls, invalid_log_urls, requests)
           invalid_log_urls << log_url
         end
 
-        requests_length += new_requests_length
+        requests.concat new_requests
+        requests_length += new_requests.length
         logs_size       += size
 
       ensure

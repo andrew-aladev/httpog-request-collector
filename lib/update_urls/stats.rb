@@ -29,8 +29,8 @@ def get_search_urls
     search_urls = []
   end
 
-  text = colorize_length search_urls.length
-  warn "received #{text} search urls"
+  search_urls_text = colorize_length search_urls.length
+  warn "received #{search_urls_text} search urls"
 
   search_urls
 end

@@ -1,6 +1,7 @@
 require "filesize"
 
 FORMAT_PERCENT_ROUND_LENGTH = 2
+MAX_STRING_LENGTH           = 100
 
 def format_percent(index, length)
   max_index = length - 1
@@ -13,4 +14,12 @@ end
 
 def format_filesize(size)
   Filesize.new(size).pretty
+end
+
+def truncate_string(value, max_length = MAX_STRING_LENGTH)
+  if value.length > max_length
+    "#{value[0...max_length]}..."
+  else
+    value
+  end
 end

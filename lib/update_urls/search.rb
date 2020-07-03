@@ -98,8 +98,8 @@ def read_new_page_urls_from_search_url(url, text, page_number, page_urls)
     return nil
   end
 
-  text = colorize_length new_page_urls.length
-  warn "received #{text} page urls"
+  new_page_urls_text = colorize_length new_page_urls.length
+  warn "received #{new_page_urls_text} page urls"
 
   new_page_urls
 end
@@ -139,8 +139,8 @@ def get_page_urls(search_urls)
 
   page_urls = page_urls.sort.uniq
 
-  text = colorize_length page_urls.length
-  warn "-- received #{text} page urls from all search urls"
+  page_urls_text = colorize_length page_urls.length
+  warn "-- received #{page_urls_text} page urls from all search urls"
 
   page_urls
 end
