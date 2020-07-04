@@ -10,7 +10,9 @@ TEMP_DIRECTORY = File.join(File.dirname(__FILE__), "..", "..", "tmp").freeze
 LOG_PATH       = File.join(TEMP_DIRECTORY, "log").freeze
 
 # Request: "GET /a/b HTTP/1.0" 200 .
+# Request: "GET /a/b HTTP/1.0" - .
 # Wrong request to be ignored: "text" 400 .
+# Wrong request to be ignored: "text" - .
 REQUEST_REGEXP = Regexp.new(
   "
     (?:
@@ -54,7 +56,11 @@ REQUEST_REGEXP = Regexp.new(
     )
     [ ]
 
-    [0-9]+
+    (?:
+        [0-9]+
+      |
+        \-
+    )
     [ ]
   ",
   Regexp::EXTENDED
