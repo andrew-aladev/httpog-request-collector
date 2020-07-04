@@ -10,28 +10,54 @@ TEMP_DIRECTORY = File.join(File.dirname(__FILE__), "..", "..", "tmp").freeze
 LOG_PATH       = File.join(TEMP_DIRECTORY, "log").freeze
 
 # Request: "GET /a/b HTTP/1.0" 200 .
+# Wrong request to be ignored: "text" 400 .
 REQUEST_REGEXP = Regexp.new(
   "
-    ['\"]
-      [^'\"[:space:]]+
-      [ ]
+    (?:
+        \"
+          (?:
+              [^\" ]+
+              [ ]
 
-      ([^ ]+)
-      [ ]
+              ([^\" ]+)
+              [ ]
 
-      HTTP/
-      (?:
-          1\.0
-        |
-          1\.1
-      )
-    ['\"]
+              HTTP/
+              (?:
+                  1\.0
+                |
+                  1\.1
+              )
+            |
+              [^\"]*
+          )
+        \"
+      |
+        '
+          (?:
+              [^' ]+
+              [ ]
+
+              ([^' ]+)
+              [ ]
+
+              HTTP/
+              (?:
+                  1\.0
+                |
+                  1\.1
+              )
+            |
+              [^']*
+          )
+        '
+    )
     [ ]
 
     [0-9]+
     [ ]
   ",
-  Regexp::MULTILINE | Regexp::EXTENDED
+  Regexp::EXTENDED
 )
 .freeze
 
@@ -83,10 +109,8 @@ def process_archive_file(log_url, archive)
 
     # Line is valid when all matches are valid.
     is_valid = matches.all? do |match|
-      if match.length != 1
-        warn "match is invalid"
-        next false
-      end
+      # Match without request uri is possible and can be ignored.
+      next true if match.length != 1
 
       request_uri = match[0]
 
