@@ -21,7 +21,7 @@ REQUEST_REGEXP = Regexp.new(
               [^\" ]+
               [ ]
 
-              ([^\" ]+)
+              ([^ ]+)
               [ ]
 
               HTTP/
@@ -40,7 +40,7 @@ REQUEST_REGEXP = Regexp.new(
               [^' ]+
               [ ]
 
-              ([^' ]+)
+              ([^ ]+)
               [ ]
 
               HTTP/
