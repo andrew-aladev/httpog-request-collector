@@ -4,12 +4,12 @@ require "pp"
 
 require_relative "common/requests"
 
-requests = read_requests ARGV[0]
+requests_with_special_symbols = read_requests ARGV[0]
 
 # -- special symbols --
 
-special_symbols_data = requests.each_with_object({}) do |request, data|
-  request[:request_uri].chars.each do |char|
+special_symbols_data = requests_with_special_symbols.each_with_object({}) do |request, data|
+  request[:uri].chars.each do |char|
     next if REQUEST_URI_REGULAR_CHARS.include? char
 
     if data.key? char

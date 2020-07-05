@@ -51,8 +51,8 @@ def read_requests(file_path)
       next nil if data.length != 2
 
       {
-        :request_uri => data[0],
-        :log_url     => data[1]
+        :log_url => data[0],
+        :uri     => data[1]
       }
     end
     .compact
@@ -60,7 +60,7 @@ end
 
 def write_requests(file_path, requests)
   data = requests.map do |request|
-    request[:request_uri] + REQUEST_SEPARATOR + request[:log_url]
+    request[:log_url] + REQUEST_SEPARATOR + request[:uri]
   end
 
   write_list file_path, data.sort.uniq

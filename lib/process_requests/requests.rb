@@ -63,7 +63,7 @@ REQUEST_REGEXP = Regexp.new(
     )
     [ ]
   ",
-  Regexp::EXTENDED
+  Regexp::MULTILINE | Regexp::EXTENDED
 )
 .freeze
 
@@ -94,70 +94,85 @@ def download_log(url)
   LOG_PATH
 end
 
-def process_archive_file(log_url, archive)
+def process_archive_file(archive)
   # Validation result is unknown.
   is_valid     = nil
-  new_requests = []
+  request_uris = []
 
   archive.read_lines do |line|
-    # We can ignore any line comes after validation result is false.
+    # We can ignore any line after validation result became false.
     next if is_valid == false
 
-    # We can just ignore any empty lines.
+    # We can just ignore any empty line.
     next if line.strip.empty?
 
-    matches = line.scan(REQUEST_REGEXP).compact
-    if matches.empty?
-      warn "line: #{truncate_string(line)} is invalid"
+    matches   = line.scan(REQUEST_REGEXP).compact
+    line_text = truncate_string line
+
+    is_match_broken = matches.any? { |match| match.length != 2 }
+    if is_match_broken
+      warn "line: #{line_text} is invalid, it has invalid match"
       is_valid = false
       next
     end
 
-    # Line is valid when all matches are valid.
-    is_valid = matches.all? do |match|
-      # Match without request uri is possible and can be ignored.
-      next true if match.length != 1
+    line_request_uris = matches.map do |match|
+      # Request uri equals to first or second match group.
+      request_uri =
+        if match[0].nil?
+          match[1]
+        else
+          match[0]
+        end
 
-      request_uri = match[0]
+      if request_uri.nil?
+        warn "line: #{line_text} has match without request uri, ignoring"
+        next nil
+      end
 
       unless request_uri.ascii_only?
-        warn "request uri: #{request_uri} is not ascii only"
-        next false
+        warn "line: #{line_text}, request uri: #{request_uri} is not ascii only, ignoring"
+        next nil
       end
 
-      is_new_request_uri = request_uri.chars.any? { |char| !REQUEST_URI_REGULAR_CHARS.include?(char) }
-
-      if is_new_request_uri
-        new_requests << {
-          :request_uri => request_uri,
-          :log_url     => log_url
-        }
-      end
-
-      true
+      request_uri
     end
+
+    if line_request_uris.empty?
+      warn "line: #{line_text} is invalid, it provides no request uris"
+      is_valid = false
+      next
+    end
+
+    # Line can be ignored when it has only invalid request uris.
+    line_request_uris = line_request_uris.compact
+    next if line_request_uris.empty?
+
+    is_valid = true
+    request_uris.concat line_request_uris
   end
 
   if is_valid
-    [true, new_requests]
+    [true, request_uris]
   else
     [false, []]
   end
 end
 
-def process_archive(log_url, file_path)
+def process_archive(file_path)
   is_valid     = false
-  new_requests = []
+  request_uris = []
 
   begin
     ArchiveReader.open file_path do |archive|
       # Each archive can consist of multiple files.
       until archive.next_header.nil?
-        is_file_valid, new_file_requests = process_archive_file log_url, archive
+        is_file_valid, file_request_uris = process_archive_file archive
+        next unless is_file_valid
 
         # Archive is valid when at least one file is valid.
-        is_valid = true if is_file_valid
-        new_requests.concat new_file_requests
+        is_valid = true
+        request_uris.concat file_request_uris
       end
     end
 
@@ -165,22 +180,31 @@ def process_archive(log_url, file_path)
     warn error
   end
 
-  if is_valid
-    requests_text = colorize_length new_requests.length
-    warn "log is #{'valid'.light_green}, received #{requests_text} requests"
-  else
+  unless is_valid
     warn "log is invalid"
+    return [false, [], []]
   end
 
-  [is_valid, new_requests]
+  request_uris_with_special_symbols = request_uris.select do |request_uri|
+    request_uri.chars.any? { |char| !REQUEST_URI_REGULAR_CHARS.include?(char) }
+  end
+
+  request_uris_text                      = colorize_length request_uris.length
+  request_uris_with_special_symbols_text = colorize_length request_uris_with_special_symbols.length
+
+  warn "log is #{'valid'.light_green}, " \
+    "received #{request_uris_text} request uris, " \
+    "received #{request_uris_with_special_symbols_text} request uris with special symbols"
+
+  [true, request_uris, request_uris_with_special_symbols]
 end
 
-def process_requests(log_urls, valid_log_urls, invalid_log_urls, requests)
-  logs_size = 0
-
-  invalid_log_urls_length = 0
-  valid_log_urls_length   = 0
-  requests_length         = 0
+def process_requests(log_urls, valid_log_urls, invalid_log_urls, requests_with_special_symbols)
+  logs_size                                = 0
+  invalid_log_urls_length                  = 0
+  valid_log_urls_length                    = 0
+  request_uris_length                      = 0
+  request_uris_with_special_symbols_length = 0
 
   log_urls
     .shuffle
@@ -192,13 +216,14 @@ def process_requests(log_urls, valid_log_urls, invalid_log_urls, requests)
       next if file_path.nil?
 
       begin
-        size      = File.size file_path
-        size_text = format_filesize size
+        size = File.size file_path
 
+        size_text = format_filesize size
         warn "downloaded log, size: #{size_text}"
 
-        is_valid, new_requests = process_archive log_url, file_path
+        logs_size += size
 
+        is_valid, new_request_uris, new_request_uris_with_special_symbols = process_archive file_path
         if is_valid
           valid_log_urls_length += 1
           valid_log_urls << log_url
@@ -207,25 +232,33 @@ def process_requests(log_urls, valid_log_urls, invalid_log_urls, requests)
           invalid_log_urls << log_url
         end
 
-        requests.concat new_requests
-        requests_length += new_requests.length
-        logs_size       += size
+        request_uris_length                      += new_request_uris.length
+        request_uris_with_special_symbols_length += new_request_uris_with_special_symbols.length
+
+        new_request_uris_with_special_symbols.each do |uri|
+          requests_with_special_symbols << {
+            :log_url => log_url,
+            :uri     => uri
+          }
+        end
 
       ensure
         File.delete file_path
       end
     end
 
-  logs_size_text        = format_filesize logs_size
-  invalid_log_urls_text = colorize_length invalid_log_urls_length
-  valid_log_urls_text   = colorize_length valid_log_urls_length
-  requests_text         = colorize_length requests_length
+  logs_size_text                         = format_filesize logs_size
+  invalid_log_urls_text                  = colorize_length invalid_log_urls_length
+  valid_log_urls_text                    = colorize_length valid_log_urls_length
+  request_uris_text                      = colorize_length request_uris_length
+  request_uris_with_special_symbols_text = colorize_length request_uris_with_special_symbols_length
 
   warn(
     "-- processed #{logs_size_text} logs size, received " \
     "#{invalid_log_urls_text} invalid logs, " \
     "#{valid_log_urls_text} valid logs, " \
-    "#{requests_text} requests"
+    "#{request_uris_text} request uris, " \
+    "#{request_uris_with_special_symbols_text} request uris with special symbols"
   )
 
   nil

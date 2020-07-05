@@ -137,7 +137,7 @@ def get_log_urls(page_urls)
       log_text = colorize_length new_log_urls.length
       warn "received #{log_text} log urls, page is #{page_text}"
 
-      log_urls += new_log_urls
+      log_urls.concat new_log_urls
     end
 
   valid_page_urls   = valid_page_urls.sort.uniq

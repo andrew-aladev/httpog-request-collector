@@ -126,8 +126,9 @@ def get_page_urls(search_urls)
       next if new_page_urls.nil?
 
       data[:page_number] += 1
-      data[:page_urls]   += new_page_urls
-      page_urls          += new_page_urls
+      data[:page_urls].concat new_page_urls
+
+      page_urls.concat new_page_urls
 
       new_queue << data
     end
