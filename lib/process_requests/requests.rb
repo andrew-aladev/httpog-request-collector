@@ -18,6 +18,7 @@ REQUEST_REGEXP = Regexp.new(
     (?:
         \"
           (?:
+              [ ]*
               [^\" ]+
               [ ]
 
@@ -30,6 +31,7 @@ REQUEST_REGEXP = Regexp.new(
                 |
                   1\.1
               )
+              [ ]*
             |
               [^\"]*
           )
@@ -37,6 +39,7 @@ REQUEST_REGEXP = Regexp.new(
       |
         '
           (?:
+              [ ]*
               [^' ]+
               [ ]
 
@@ -49,6 +52,7 @@ REQUEST_REGEXP = Regexp.new(
                 |
                   1\.1
               )
+              [ ]*
             |
               [^']*
           )
