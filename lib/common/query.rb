@@ -38,7 +38,7 @@ QUERY_HTTP_OPTIONS =
   .freeze
 
 def get_http_content(uri, redirect_limit = QUERY_REDIRECT_LIMIT)
-  raise QueryError, "http redirect limit exceeded" if redirect_limit == 0
+  raise QueryError, "http redirect limit exceeded" if redirect_limit.zero?
 
   options = QUERY_HTTP_OPTIONS.merge(
     :use_ssl => uri.scheme == "https"

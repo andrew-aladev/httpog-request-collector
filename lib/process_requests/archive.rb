@@ -44,7 +44,7 @@ class ArchiveReader < Archive::BaseArchive
       length = C.archive_read_data archive, buffer, BUFFER_SIZE
 
       break if length.zero?
-      raise Error, @archive if length < 0
+      raise Error, @archive if length.negative?
 
       yield buffer.get_bytes(0, length)
     end
