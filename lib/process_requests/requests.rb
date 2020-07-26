@@ -112,6 +112,7 @@ def process_archive_file(archive)
 
     matches   = line.scan(REQUEST_REGEXP).compact
     line_text = truncate_string line
+    line_text = "<non ascii>" unless line_text.ascii_only?
 
     is_match_broken = matches.any? { |match| match.length != 2 }
     if is_match_broken
