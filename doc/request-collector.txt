@@ -24,29 +24,29 @@ We can collect representative statistics.
 Search results are the list of page urls.
 We will visit pages in random order and collect all log urls that includes "log" substring.
 
-Page urls with at least one log url will be stored in "data/valid_page_urls.xz".
-Page urls with no log urls will be stored in "data/invalid_page_urls.xz".
-Links will be stored in "data/log_urls.xz".
+Page urls with at least one log url will be stored in "data/valid_page_urls.zst".
+Page urls with no log urls will be stored in "data/invalid_page_urls.zst".
+Links will be stored in "data/log_urls.zst".
 
-It is possible to view these lists by using "less data/valid_page_urls.xz".
+It is possible to view these lists by using "less data/valid_page_urls.zst".
 
 -----
 
 Log urls will be visited in random order.
 Log url is valid when it has at least one request.
 
-Valid log urls will be stored in "data/valid_log_urls.xz".
-Invalid log urls will be stored in "data/invalid_log_urls.xz".
+Valid log urls will be stored in "data/valid_log_urls.zst".
+Invalid log urls will be stored in "data/invalid_log_urls.zst".
 
-It is possible to view these lists by using "less data/valid_log_urls.xz".
+It is possible to view these lists by using "less data/valid_log_urls.zst".
 
 -----
 
 We don't need to store all URIs.
 We need just to store URIs that have at least one special symbol.
-HTTP request URIs with special symbols will be stored in "data/requests_with_special_symbols.xz".
+HTTP request URIs with special symbols will be stored in "data/requests_with_special_symbols.zst".
 
-It is possible to view these lists by using "less data/requests_with_special_symbols.xz".
+It is possible to view these lists by using "less data/requests_with_special_symbols.zst".
 
 There is a special script "scripts/requests_with_special_symbols.sh".
 It outputs a list of special symbols used in URIs.

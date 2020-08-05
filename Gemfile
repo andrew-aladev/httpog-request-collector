@@ -4,7 +4,7 @@ gem "addressable"
 gem "colorize"
 gem "ffi-libarchive"
 gem "filesize"
-gem "ruby-xz"
+gem "ruby-zstds"
 
 group :development, :test do
   gem "rake"

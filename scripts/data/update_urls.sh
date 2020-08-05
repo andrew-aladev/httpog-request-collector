@@ -12,6 +12,6 @@ TMP_SIZE="1024"
 ./scripts/temp/mount.sh "$TMP_PATH" "$TMP_SIZE"
 
 ./lib/update_urls/main.rb \
-  "data/valid_page_urls.xz" \
-  "data/invalid_page_urls.xz" \
-  "data/log_urls.xz"
+  "data/valid_page_urls.zst" \
+  "data/invalid_page_urls.zst" \
+  "data/log_urls.zst"

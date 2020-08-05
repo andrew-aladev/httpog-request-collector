@@ -12,6 +12,6 @@ TMP_SIZE="1024"
 ./scripts/temp/mount.sh "$TMP_PATH" "$TMP_SIZE"
 
 ./lib/process_requests/invalid.rb \
-  "data/valid_log_urls.xz" \
-  "data/invalid_log_urls.xz" \
-  "data/requests_with_special_symbols.xz"
+  "data/valid_log_urls.zst" \
+  "data/invalid_log_urls.zst" \
+  "data/requests_with_special_symbols.zst"
