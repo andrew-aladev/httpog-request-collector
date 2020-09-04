@@ -10,8 +10,11 @@ require_relative "../common/query"
 # This method provides better results.
 
 # Example search text: "access.log"|"ACCESS_LOG" index|directory.
-MAIN_TEXTS = %w[ACCESS access].flat_map do |file|
-  %w[LOG log].flat_map do |extension|
+MAIN_FILES      = %w[ACCESS access].freeze
+MAIN_EXTENSIONS = %w[LOG log].freeze
+
+MAIN_TEXTS = MAIN_FILES.flat_map do |file|
+  MAIN_EXTENSIONS.flat_map do |extension|
     [
       "#{file}.#{extension}",
       "#{file}_#{extension}"
