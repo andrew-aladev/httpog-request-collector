@@ -15,7 +15,6 @@ if [ $kernel_name = "Darwin" ]; then
   sectors=$((2048 * $TMP_SIZE))
   disk_id=$(hdiutil attach -nomount "ram://${sectors}")
   diskutil erasevolume HFS+ "$TMP_PATH" "$disk_id"
-
 else
   umount -f "$TMP_PATH" || true
   mount -t ramfs -o size=${TMP_SIZE}M,mode=777 ramfs "$TMP_PATH"
