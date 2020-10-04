@@ -59,7 +59,7 @@ How to use these scripts?
 curl -sSL https://get.rvm.io | bash -s stable
 
 2. Install ruby
-rvm install ruby-2.7.1 -C --enable-socks
+rvm install ruby-2.7.2 -C --enable-socks
 
 3. Install required gems
 bundle install
