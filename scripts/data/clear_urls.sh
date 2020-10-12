@@ -6,8 +6,6 @@ cd "$DIR"
 
 cd "../.."
 
-empty_data=$(echo "" | zstd -c)
-
-echo "$empty_data" > "data/valid_page_urls.zst"
-echo "$empty_data" > "data/invalid_page_urls.zst"
-echo "$empty_data" > "data/log_urls.zst"
+echo "" | zstd -c > "data/valid_page_urls.zst"
+cp "data/valid_page_urls.zst" "data/invalid_page_urls.zst"
+cp "data/valid_page_urls.zst" "data/log_urls.zst"
