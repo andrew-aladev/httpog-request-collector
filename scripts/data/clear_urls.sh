@@ -6,6 +6,6 @@ cd "$DIR"
 
 cd "../.."
 
-echo "" | zstd -c > "data/valid_page_urls.zst"
+echo -n "" | zstd -c > "data/valid_page_urls.zst"
 cp "data/valid_page_urls.zst" "data/invalid_page_urls.zst"
 cp "data/valid_page_urls.zst" "data/log_urls.zst"
