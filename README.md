@@ -4,4 +4,4 @@ Please read [documentation](doc/request-collector.txt).
 
 ## License
 
-MIT license, see LICENSE and AUTHORS.
+MIT license, see [LICENSE](LICENSE) and [AUTHORS](AUTHORS).
