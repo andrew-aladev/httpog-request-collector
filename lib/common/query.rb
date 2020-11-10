@@ -45,7 +45,7 @@ def get_http_content(uri, redirect_limit = QUERY_REDIRECT_LIMIT)
   )
 
   begin
-    response = Net::HTTP.start(uri.host, uri.port, options) do |http|
+    response = Net::HTTP.start uri.host, uri.port, options do |http|
       path_for_head = uri.path
       path_for_head = "/" if path_for_head.empty?
       head          = http.request_head path_for_head
@@ -102,7 +102,7 @@ def process_ftp(uri, &_block)
   )
 
   begin
-    Net::FTP.open(uri.host, options) do |ftp|
+    Net::FTP.open uri.host, options do |ftp|
       ftp.login
       yield ftp
     end
@@ -116,7 +116,7 @@ def process_ftp(uri, &_block)
 end
 
 def download_file_from_ftp(uri, file_path)
-  process_ftp(uri) do |ftp|
+  process_ftp uri do |ftp|
     get_file_from_ftp ftp, uri.path, file_path
   end
 
@@ -124,7 +124,7 @@ def download_file_from_ftp(uri, file_path)
 end
 
 def get_content_or_listing_from_ftp(uri)
-  process_ftp(uri) do |ftp|
+  process_ftp uri do |ftp|
     # We don't know whether uri path is file or listing.
     # We can try to get listing for the first time.
 
