@@ -89,7 +89,7 @@ def download_log(url)
     # Query error equal empty log from analysis perspective.
     # So we can simulate that we received empty log.
     warn query_error
-    File.write LOG_PATH, ""
+    File.write LOG_PATH, "", :mode => "wb"
   rescue StandardError => error
     warn error
     return nil

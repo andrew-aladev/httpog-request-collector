@@ -79,7 +79,7 @@ end
 
 def download_http_file(uri, file_path)
   content = get_http_content uri
-  File.write file_path, content
+  File.write file_path, content, :mode => "wb"
 
   nil
 end
