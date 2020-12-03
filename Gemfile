@@ -9,7 +9,5 @@ gem "ruby-zstds"
 group :development, :test do
   gem "rake"
   gem "rubocop"
-  gem "rubocop-minitest"
   gem "rubocop-performance"
-  gem "rubocop-rake"
 end
