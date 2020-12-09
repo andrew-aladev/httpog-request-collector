@@ -10,4 +10,5 @@ group :development, :test do
   gem "rake"
   gem "rubocop"
   gem "rubocop-performance"
+  gem "rubocop-rake"
 end
