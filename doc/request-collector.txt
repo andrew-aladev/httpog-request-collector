@@ -56,10 +56,10 @@ It outputs a list of special symbols used in URIs.
 How to use these scripts?
 
 1. Install rvm
-curl -sSL https://get.rvm.io | bash -s stable
+curl -sSL https://get.rvm.io | bash -s master
 
 2. Install ruby
-rvm install ruby-2.7.2 -C --enable-socks
+rvm install ruby-3.0.0
 
 3. Install required gems
 bundle install
