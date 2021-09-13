@@ -147,9 +147,11 @@ def get_log_urls(page_urls)
   valid_page_text   = colorize_length valid_page_urls.length
   invalid_page_text = colorize_length invalid_page_urls.length
   log_text          = colorize_length log_urls.length
-  warn "-- received #{log_text} log urls " \
+  warn(
+    "-- received #{log_text} log urls " \
     "from #{valid_page_text} valid page urls, " \
     "#{invalid_page_text} invalid page urls"
+  )
 
   [valid_page_urls, invalid_page_urls, log_urls]
 end

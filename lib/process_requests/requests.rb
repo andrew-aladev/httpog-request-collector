@@ -197,9 +197,11 @@ def process_archive(file_path)
   request_uris_text                      = colorize_length request_uris.length
   request_uris_with_special_symbols_text = colorize_length request_uris_with_special_symbols.length
 
-  warn "log is #{'valid'.light_green}, " \
+  warn (
+    "log is #{'valid'.light_green}, " \
     "received #{request_uris_text} request uris, " \
     "received #{request_uris_with_special_symbols_text} request uris with special symbols"
+  )
 
   [true, request_uris, request_uris_with_special_symbols]
 end

@@ -18,6 +18,8 @@ Layout/MultilineMethodCallIndentation:
   Enabled: false
 Layout/RescueEnsureAlignment:
   Enabled: false
+Lint/AmbiguousOperatorPrecedence:
+  Enabled: false
 
 Metrics/AbcSize:
   Enabled: false
